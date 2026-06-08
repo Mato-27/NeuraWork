@@ -20,9 +20,12 @@
 */
 class Matrix {
     private:
-        int m; /// number of rows of the Matrix
-        int n; /// number of columns of the Matrix
-        double* array; /// array containing the Matrix values
+        /// number of rows of the Matrix
+        int m; 
+        /// number of columns of the Matrix
+        int n; 
+        /// array containing the Matrix values
+        double* array; 
 
     public:
         /**

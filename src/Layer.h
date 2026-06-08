@@ -16,13 +16,20 @@
 */
 class Layer {
     private:
-        int inputSize; /// Number of input neurons (N)
-        int outputSize; /// Number of output neurons (M)
-        Matrix X; /// Saved input (1*N size)
-        Matrix W; /// Weights (N*M size)
-        Matrix B; /// Bias (1*M size)
-        Matrix Z; /// Pre-activation (1*M size) Z = X . W + B
-        Matrix A; /// Output Matrix (1*M size) A = Z.computeReLU()
+        /// Number of input neurons (N)
+        int inputSize; 
+        /// Number of output neurons (M)
+        int outputSize;
+        /// Saved input (1*N size)
+        Matrix X; 
+        /// Weights (N*M size)
+        Matrix W; 
+        /// Bias (1*M size)
+        Matrix B; 
+        /// Pre-activation (1*M size) Z = X . W + B
+        Matrix Z; 
+        /// Output Matrix (1*M size) A = Z.computeReLU()
+        Matrix A; 
 
     public:
         /**
