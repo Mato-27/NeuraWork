@@ -41,13 +41,13 @@ Matrix& Layer::forward(const Matrix& inputMatrix) {
 }
 
 /* Weight Matrix setter with constant reference tracking */
-void Layer::setW (Matrix& w) {
+void Layer::setW (const Matrix& w) {
     // Perform a deep copy of weight parameters into the persistent layer attribut
     W = w;
 }
 
 /* Bias Matrix setter with constant reference tracking */
-void Layer::setB (Matrix& b) {
+void Layer::setB (const Matrix& b) {
     // Perform a deep copy of bias parameters into the persistent layer attribute
     B = b;
 }

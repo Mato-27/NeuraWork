@@ -1,3 +1,10 @@
+/**
+* @file main.cpp
+* @brief Main test runner and conformance verification 
+* @author Magdi.V
+* @date June 8, 2026
+*/
+
 #include "Matrix.h"
 #include "Layer.h"
 #include <cassert>

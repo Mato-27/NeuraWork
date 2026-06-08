@@ -46,13 +46,13 @@ class Layer {
         * @brief Configures the internal weight matrix with constant deep-copy validation
         * @param w Constant reference to the weight Matrix source of dimensions (Input Size x Output Size)
         */
-        void setW (Matrix& w);
+        void setW (const Matrix& w);
 
         /**
         * @brief Configures the internal bias vector with constant deep-copy validation
         * @param b Constant reference to the bias vector source of dimensions (1 x Output Size)
         */
-        void setB (Matrix& b);
+        void setB (const Matrix& b);
 };
 
 #endif
