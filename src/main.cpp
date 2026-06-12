@@ -7,6 +7,7 @@
 
 #include "Matrix.h"
 #include "Layer.h"
+#include "MSELoss.h"
 #include <cassert>
 #include <iostream>
 #include <cmath>
@@ -146,6 +147,43 @@ void test_layer() {
 }
 
 /**
+* @brief Validates the Mean Squared Error (MSE) loss forward and backward pipelines
+*/
+void test_loss() {
+    // Instantiate the concrete MSELoss criteria configuration
+    MSELoss M_Loss;
+
+    // Generate a 2x2 prediction Matrix filled with uniform 4.0 values
+    Matrix pred_Matrix(2,2);
+    pred_Matrix.randomize(4.0, 4.0);
+
+    // Generate a 2x2 ground truth target Matrix filled with uniform 2.0 values
+    Matrix target_Matrix(2,2);
+    target_Matrix.randomize(2.0, 2.0);
+
+    // Execute the forward pass and evaluate the scalar loss value
+    double f_pass = M_Loss.forward(pred_Matrix, target_Matrix);
+    
+    // Assert that the evaluated loss perfectly matches the theoretical baseline of 4.0
+    assert_almost_equal(f_pass, 4.0);
+
+    // Setup a 2x2 pre-allocated destination Matrix to catch backpropagated activations
+    Matrix dest_Matrix(2,2);
+
+    // Execute the destination-driven backward pass to compute partial derivatives
+    M_Loss.backward(pred_Matrix, target_Matrix, dest_Matrix);
+
+    // Setup a 2x2 ground truth gradient Matrix filled with the expected value 1.0
+    Matrix ground_Matrix(2,2);
+    ground_Matrix.randomize(1.0, 1.0);
+
+    // Assert that the computed gradient matrix strictly matches the mathematical ground truth
+    assert(dest_Matrix == ground_Matrix);
+
+    std::cout << "[PASS] test_loss" << std::endl;
+}
+
+/**
  * @brief Main test runner program orchestrating the validation suites
  */
 int main() {
@@ -156,6 +194,7 @@ int main() {
     test_operators();
     test_hpc_methods();
     test_layer();
+    test_loss();
     
     std::cout << "=== ALL TESTS PASSED SUCCESSFULLY ===" << std::endl;
     return 0;

@@ -67,6 +67,7 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 * **Linear Algebra Correctness:** Validates addition, subtraction, and nested kij multiplication.
 * **High-Performance Methods:** Tests the robustness of in-place memory mutations and the array-flattening indexing logic.
 * **Mini-Batch Layer Verification:** Asserts forward pass correctness by executing a mock $3 \times 2$ layer layout over an incoming $2 \times 3$ data mini-batch, confronting actual results against a deterministic mathematical baseline.
+* **Loss Infrastrucure Validation:** Asserts the mathematical exactness of the Mean Squared Error (MSE) forward scalar cost calculation and validates the destination-driven partial derivatives against a deterministic mathematical baseline.
 
 ## 🗺️ Engineering Roadmap
 * **[x] Phase 1:** Core Matrix Engine, RAII Memory Management, Cache-Optimized Multiplication.
@@ -75,7 +76,7 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 
 * **[x] Phase 3:** Layer Object Abstraction, Dynamic Mini-Batching, Zero-Allocation Broadcast Engine.
 
-* **[ ] Phase 4:** Loss Function Infrastructure (MSE, Cross-Entropy) and Output Gradient Vectors.
+* **[X] Phase 4:** Loss Function Infrastructure (MSE, Cross-Entropy) and Output Gradient Vectors.
 
 * **[ ] Phase 5:** Backpropagation Engine (Chain Rule Matrix Differentiation and Backward Pass Tracking).
 
@@ -86,6 +87,6 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 ## 📄 Author & Specifications
 * **Author:** *Magdi Vitteau* (Claude Bernard University Lyon 1)
 
-* **Status:** Phase 3 Complete - Validated Conformance
+* **Status:** Phase 4 Complete - Validated Loss & Activation Gradients
 
 * **License:** Open for Academic and High-Performance Software Review

@@ -195,3 +195,11 @@ void Matrix::computeReLU () {
         array[i] = std::max(0.0, array[i]);
     }
 }
+
+/* Computes the in-place gradient of the ReLU activation function */
+void Matrix::d_computeReLU (const Matrix& Z) {
+    if (n != Z.getColumns() || m != Z.getRows()) throw std::invalid_argument("Matrix dimensions must match.");
+    for (int i = 0; i < n * m; i++) {
+        if (Z.array[i] <= 0.0) array[i] = 0.0;
+    }
+}

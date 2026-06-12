@@ -1,7 +1,7 @@
 all: main.out
 
-main.out: obj/main.o obj/matrix.o obj/layer.o
-	g++ -g obj/main.o obj/matrix.o  obj/layer.o -o bin/main.out
+main.out: obj/main.o obj/matrix.o obj/layer.o obj/MSELoss.o
+	g++ -g obj/main.o obj/matrix.o  obj/layer.o obj/MSELoss.o -o bin/main.out
 
 obj/main.o: src/main.cpp src/Matrix.h src/Layer.h
 	g++ -g -Wall -c src/main.cpp -o obj/main.o
@@ -11,6 +11,9 @@ obj/matrix.o: src/Matrix.h src/Matrix.cpp
 
 obj/layer.o: src/Layer.h src/Layer.cpp
 	g++ -g -Wall -c src/Layer.cpp -o obj/layer.o
+
+obj/MSELoss.o: src/MSELoss.h src/MSELoss.cpp
+	g++ -g -Wall -c src/MSELoss.cpp -o obj/MSELoss.o
 
 docu:
 	doxygen doc/doxyfile

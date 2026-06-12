@@ -139,6 +139,36 @@ class Matrix {
         * values directly to 0.0 in-place, achieving zero-allocation performance overhaead
         */
         void computeReLU ();
+
+        /**
+        * @brief Constant operator () overloading
+        * @param i Row index
+        * @param j Column index
+        * @return the value at the index (i,j) of the Matrix
+        */
+        double operator () (const int i, const int j) const {
+            return array[n*i+j];
+        }
+
+        /**
+        * @brief Operator () overloading
+        * @param i Row index
+        * @param j Column index
+        * @return the value at the index (i,j) of the Matrix
+        */
+        double& operator () (const int i, const int j) {
+            return array[n*i+j];
+        }
+
+        /**
+        * @brief Computes the in-place gradient of the ReLU activation function
+        * @details Fuses the local derivative computation and the Hadamard product
+        * Mutates the current gradient matrix (dL_dA) into the pre-activation gradient
+        * by clamping elements to 0.0 if the corresponding element in Z is less than or equal to 0.0
+        * @param Z Constant reference to the pre-activation Matrix containing the original linear states
+        * @throws std::invalid_argument If the dimensions of Z do not perfectly match the dimensions of *this
+        */
+        void d_computeReLU (const Matrix& Z);
 };
 
 #endif
