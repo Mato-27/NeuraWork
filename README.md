@@ -1,6 +1,6 @@
-# NeuroWork - Deep Learning Framework From Scratch in C++
+# NeuraWork - Deep Learning Framework From Scratch in C++
 
-NeuroWork is a high-performance, lightweight Deep Learning engine built entirely from scratch in C++. Designed with mechanical sympathy and strict systems engineering principles, this framework completely bypasses external library dependencies to expose the low-level mechanics of neural computing.
+NeuraWork is a high-performance, lightweight Deep Learning engine built entirely from scratch in C++. Designed with mechanical sympathy and strict systems engineering principles, this framework completely bypasses external library dependencies to expose the low-level mechanics of neural computing.
 
 Optimized for maximum computational efficiency, the architecture prioritizes CPU cache locality, contiguity of memory structures, and a zero-allocation pipeline during network inference.
 
@@ -25,7 +25,7 @@ Optimized for maximum computational efficiency, the architecture prioritizes CPU
 
 ## 📁 Repository Structure
 ```text
-NeuroWork/
+NeuraWork/
 ├── bin/            # Compiled binary outputs (executable runners)
 ├── doc/            # Documentation configurations (Doxyfile)
 ├── src/            # Core source and header engineering files
@@ -68,7 +68,7 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 * **High-Performance Methods:** Tests the robustness of in-place memory mutations and the array-flattening indexing logic.
 * **Mini-Batch Layer Verification:** Asserts forward pass correctness by executing a mock $3 \times 2$ layer layout over an incoming $2 \times 3$ data mini-batch, confronting actual results against a deterministic mathematical baseline.
 * **Loss Infrastrucure Validation:** Asserts the mathematical exactness of the Mean Squared Error (MSE) forward scalar cost calculation and validates the destination-driven partial derivatives against a deterministic mathematical baseline.
-* **Backpropagation Engine Validation:** Mocks a miniature network topology to verify the mathematical exactness of the generalized chain rule. Validates in-place input gradients ($\frac{\partial X}$), weight updates ($\frac{\partial L}{\partial W}$), and column-wise bias reductions ($\frac{\partial L}{\partial B}$) against deterministic baselines.
+* **Backpropagation Engine Validation:** Mocks a miniature network topology to verify the mathematical exactness of the generalized chain rule. Validates in-place input gradients ($\frac{\partial L}{\partial X}$), weight updates ($\frac{\partial L}{\partial W}$), and column-wise bias reductions ($\frac{\partial L}{\partial B}$) against deterministic baselines.
 
 ## 🗺️ Engineering Roadmap
 * **[x] Phase 1:** Core Matrix Engine, RAII Memory Management, Cache-Optimized Multiplication.
