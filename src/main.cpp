@@ -183,6 +183,44 @@ void test_loss() {
     std::cout << "[PASS] test_loss" << std::endl;
 }
 
+void test_backward() {
+    // Instantiate a mock layer structure with 2 inputs and 2 outputs
+    Layer l1(2, 2);
+
+    // Setup a 2x2 weight matrix with uniform 0.5 values and inject it into the layer
+    Matrix W(2, 2);
+    W.randomize(0.5,0.5);
+    l1.setW(W);
+
+    // Setup a 1x2 bias vector with uniform 1.0 values and inject it into the layer
+    Matrix B(1, 2);
+    B.randomize(1.0, 1.0);
+    l1.setB(B);
+
+    // Setup a 1x2 input Matrix filled with uniform 2.0 values
+    Matrix X(1, 2);
+    X.randomize(2.0, 2.0);
+
+    // Execute the forward pass to populate internal activations and pre-activations
+    l1.forward(X);
+
+    // Setup a 1x2 incoming gradient Matrix filled with uniform 1.0 values
+    Matrix dL_dA(1, 2);
+    dL_dA.randomize(1.0, 1.0);
+
+    // Pre-allocate a 1x2 destination Matrix for the input gradient
+    Matrix dL_dX(1, 2);
+
+    // Execute the backward pass to calculate gradients in place
+    l1.backward(dL_dA, dL_dX);
+
+    // Verify the input gradient matrix values against mathematical expectations
+    assert_almost_equal(dL_dX(0, 0), 1.0);
+    assert_almost_equal(dL_dX(0, 1), 1.0);
+
+    std::cout << "[PASS] test_backward" << std::endl;
+}
+
 /**
  * @brief Main test runner program orchestrating the validation suites
  */
@@ -195,6 +233,7 @@ int main() {
     test_hpc_methods();
     test_layer();
     test_loss();
+    test_backward();
     
     std::cout << "=== ALL TESTS PASSED SUCCESSFULLY ===" << std::endl;
     return 0;

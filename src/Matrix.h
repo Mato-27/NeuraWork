@@ -169,6 +169,25 @@ class Matrix {
         * @throws std::invalid_argument If the dimensions of Z do not perfectly match the dimensions of *this
         */
         void d_computeReLU (const Matrix& Z);
+
+        /**
+        * @brief Performs a high-performance matrix multiplication with implicit transposition
+        * @details Evaluates dimensions based on flags, resets the destination matrix, and executes
+        * an optimized loop nesting layout to maximize CPU cache locality
+        * @param A Constant reference to the left operand Matrix
+        * @param transA Flag forcing an implicit row/column swap layout for Matrix A 
+        * @param B Constant reference to the right operand Matrix
+        * @param transB Flag forcing an implicit row/column swap layout for Matrix B 
+        * @param C Reference to the pre-allocated destination Matrix where resultes are accumulated
+        */
+        void d_mult(const Matrix& A, bool transA, const Matrix& B, bool transB, Matrix& C);
+
+        /***
+        * @brief Computes a column-wise reduction sum
+        * @details Accumulates elements accros rows for each individual column to build a row-vector
+        * @param A Reference to the pre-allocated 1xN destination vector Matrix 
+        */
+        void sum(Matrix& A);
 };
 
 #endif

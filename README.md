@@ -68,6 +68,7 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 * **High-Performance Methods:** Tests the robustness of in-place memory mutations and the array-flattening indexing logic.
 * **Mini-Batch Layer Verification:** Asserts forward pass correctness by executing a mock $3 \times 2$ layer layout over an incoming $2 \times 3$ data mini-batch, confronting actual results against a deterministic mathematical baseline.
 * **Loss Infrastrucure Validation:** Asserts the mathematical exactness of the Mean Squared Error (MSE) forward scalar cost calculation and validates the destination-driven partial derivatives against a deterministic mathematical baseline.
+* **Backpropagation Engine Validation:** Mocks a miniature network topology to verify the mathematical exactness of the generalized chain rule. Validates in-place input gradients ($\frac{\partial X}$), weight updates ($\frac{\partial L}{\partial W}$), and column-wise bias reductions ($\frac{\partial L}{\partial B}$) against deterministic baselines.
 
 ## 🗺️ Engineering Roadmap
 * **[x] Phase 1:** Core Matrix Engine, RAII Memory Management, Cache-Optimized Multiplication.
@@ -78,7 +79,7 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 
 * **[X] Phase 4:** Loss Function Infrastructure (MSE, Cross-Entropy) and Output Gradient Vectors.
 
-* **[ ] Phase 5:** Backpropagation Engine (Chain Rule Matrix Differentiation and Backward Pass Tracking).
+* **[X] Phase 5:** Backpropagation Engine (Chain Rule Matrix Differentiation and Backward Pass Tracking).
 
 * **[ ] Phase 6:** Optimization Engine (Stochastic Gradient Descent and Adaptive Moment Estimation - Adam).
 
@@ -87,6 +88,6 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 ## 📄 Author & Specifications
 * **Author:** *Magdi Vitteau* (Claude Bernard University Lyon 1)
 
-* **Status:** Phase 4 Complete - Validated Loss & Activation Gradients
+* **Status:** Phase 5 Complete - Fully Functional Backpropagation Engine
 
 * **License:** Open for Academic and High-Performance Software Review

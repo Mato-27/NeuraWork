@@ -203,3 +203,30 @@ void Matrix::d_computeReLU (const Matrix& Z) {
         if (Z.array[i] <= 0.0) array[i] = 0.0;
     }
 }
+
+void Matrix::d_mult(const Matrix& A, bool transA, const Matrix& B, bool transB, Matrix& C) {
+    int rowsA = transA ? A.n : A.m;
+    int colsA = transA ? A.m : A.n;
+    int rowsB = transB ? B.n : B.m;
+    int colsB = transB ? B.m : B.n;
+    if (colsA != rowsB) throw std::invalid_argument("Incompatible matrix dimensions for multiplication.");
+    if (C.m != rowsA || C.n != colsB) throw std::invalid_argument("Incompatible matrix dimensions for multiplication.");
+    for (int i = 0; i < C.m * C.n; i++) C.array[i] = 0.0;
+    for (int k = 0; k < colsA; k++) {
+        for (int i = 0; i < rowsA; i++) {
+            for (int j = 0; j<colsB; j++) {
+                C.array[C.n * i + j] += (transA ? A.array[A.n*k + i] : A.array[A.n*i + k]) * (transB ? B.array[B.n * j + k] : B.array[B.n * k + j]);
+            }
+        }
+    }
+}
+
+void Matrix::sum(Matrix& A) {
+    if (A.n != this->n || A.m != 1) throw std::invalid_argument("Incompatible matrix dimensions for multiplication.");
+    for (int i = 0; i < A.n * A.m; i++) A.array[i] = 0.0;
+    for (int i = 0; i < this->m; i++) {
+        for (int j = 0; j < this->n; j++) {
+            A.array[j] += this->array[n * i + j];
+        }
+    }
+}

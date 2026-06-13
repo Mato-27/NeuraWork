@@ -24,10 +24,16 @@ class Layer {
         Matrix X; 
         /// Weights (N*M size)
         Matrix W; 
+        /// dWeights (N*M size)
+        Matrix dW; 
         /// Bias (1*M size)
         Matrix B; 
+        /// dBias (1*M size)
+        Matrix dB; 
         /// Pre-activation (1*M size) Z = X . W + B
         Matrix Z; 
+        /// dPre-activation (Batch Size * Output Neurons)
+        Matrix dZ; 
         /// Output Matrix (1*M size) A = Z.computeReLU()
         Matrix A; 
 
@@ -60,6 +66,8 @@ class Layer {
         * @param b Constant reference to the bias vector source of dimensions (1 x Output Size)
         */
         void setB (const Matrix& b);
+
+        void backward(const Matrix& dL_dA, Matrix& dL_dX);
 };
 
 #endif

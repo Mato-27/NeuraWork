@@ -12,8 +12,11 @@ Layer::Layer(int inputSize, int outputSize) :
     outputSize(outputSize > 0 ? outputSize : 0),
     X(1, inputSize), 
     W(inputSize, outputSize), 
+    dW(inputSize, outputSize),
     B(1, outputSize), 
+    dB(1, outputSize), 
     Z(1, outputSize), 
+    dZ(1, outputSize), 
     A(1, outputSize) {
 
     }
@@ -50,4 +53,12 @@ void Layer::setW (const Matrix& w) {
 void Layer::setB (const Matrix& b) {
     // Perform a deep copy of bias parameters into the persistent layer attribute
     B = b;
+}
+
+void Layer::backward(const Matrix& dL_dA, Matrix& dL_dX) {
+    dZ = dL_dA;
+    dZ.d_computeReLU(Z);
+    dL_dX.d_mult(X, true, dZ, false, dW);
+    dZ.sum(dB);
+    dL_dX.d_mult(dZ, false, W, true, dL_dX);
 }
