@@ -8,6 +8,7 @@
 #include "Matrix.h"
 #include "Layer.h"
 #include "MSELoss.h"
+#include "Sequential.h"
 #include <cassert>
 #include <iostream>
 #include <cmath>
@@ -221,6 +222,145 @@ void test_backward() {
     std::cout << "[PASS] test_backward" << std::endl;
 }
 
+/** 
+* @brief Validates the linear graph orchestration of the Sequential class 
+*/
+void test_sequential() {
+    // Instantiate the global Sequential network orchestrator
+    Sequential seq;
+
+    // --- Layer 1 Configuration ---
+    // Allocate a unique pointer for the first hidden layer (2 inputs, 3 outputs)
+    std::unique_ptr<Layer> l1 = std::make_unique<Layer> (2,3);
+
+    // Setup a 2x3 weight matrix with uniform 0.5 values and inject it into the first layer
+    Matrix w1(2, 3);
+    w1.randomize(0.5, 0.5);
+    l1->setW(w1);
+
+    // Setup a 1x3 bias vector with uniform 0.0 values and inject it into the first layer
+    Matrix b1(1, 3);
+    b1.randomize(0.0, 0.0);
+    l1->setB(b1);
+
+    // Transfer ownership of the fully configured first layer into the sequential pipeline
+    seq.add(std::move(l1));
+
+    // --- Layer 2 Configuration ---
+    // Allocate a unique pointer for the first hidden layer (3 inputs, 2 outputs)
+    std::unique_ptr<Layer> l2 = std::make_unique<Layer> (3,2);
+
+    // Setup a 3x2 weight matrix with uniform 1.0 values and inject it into the first layer
+    Matrix w2(3, 2);
+    w2.randomize(1.0, 1.0);
+    l2->setW(w2);
+
+    // Setup a 1x2 bias vector with uniform 0.5 values and inject it into the first layer
+    Matrix b2(1, 2);
+    b2.randomize(0.5, 0.5);
+    l2->setB(b2);
+
+    // Transfer ownership of the fully configured second layer into the sequential pipeline
+    seq.add(std::move(l2));
+
+    // --- Forward integration test ---
+    // Setup a 1x2 input Matrix filled with uniform 2.0 values
+    Matrix m1(1, 2);
+    m1.randomize(2.0, 2.0);
+
+    // Propagate the input matrix through the multi-layer sequence and capture the final reference
+    const Matrix& prediction = seq.forward(m1);
+
+    // Verify final network predictions against the combined theoretical baseline
+    assert_almost_equal(prediction(0,0), 6.5);
+    assert_almost_equal(prediction(0,1), 6.5);
+    
+    // --- Backward integration test ---
+    // Setup a 1x2 incoming loss gradient Matrix filled with uniform 1.0 values
+    Matrix m2(1, 2);
+    m2.randomize(1.0, 1.0);
+
+    // Trigger the global backward chain rule execution across the network graph
+    seq.backward(m2);
+
+    // Assert that the internal error gradients have correctly rippled back to the first layer's parameters
+    assert_almost_equal(seq.getFirstLayerdW()(0,0), 4.0);
+    assert_almost_equal(seq.getFirstLayerdW()(0,1), 4.0);
+    assert_almost_equal(seq.getFirstLayerdW()(0,2), 4.0);
+    assert_almost_equal(seq.getFirstLayerdW()(1,0), 4.0);
+    assert_almost_equal(seq.getFirstLayerdW()(1,1), 4.0);
+    assert_almost_equal(seq.getFirstLayerdW()(1,2), 4.0);
+
+    assert_almost_equal(seq.getFirstLayerdB()(0,0), 2.0);
+    assert_almost_equal(seq.getFirstLayerdB()(0,1), 2.0);
+    assert_almost_equal(seq.getFirstLayerdB()(0,2), 2.0);
+    
+    std::cout << "[PASS] test_sequential" << std::endl;
+}
+
+/**
+* @brief Validates the complete training loop orchestration from forward pass to in-place parameter optimization
+*/
+void test_sgd_optimizer() {
+    // Setup the deterministic execution graph, input mini-batches and learning criteria
+    double alpha = 0.1; // rate of learning
+    SGDOptimizer sgdOpti(alpha);
+    Sequential network;
+    std::unique_ptr<Layer> l1 = std::make_unique<Layer> (2,2);
+
+    Matrix Winit(2, 2);
+    Winit.randomize(0.5, 0.5);
+    l1->setW(Winit);
+
+    Matrix Binit(1, 2);
+    Binit.randomize(1.0, 1.0);
+    l1->setB(Binit);
+
+    network.add(std::move(l1));
+
+    Matrix X(1, 2);
+    X.randomize(2.0, 2.0);
+
+    Matrix Ytarget(1, 2);
+    Ytarget.randomize(0.0, 0.0);
+
+    MSELoss Criteria;
+
+    // Perform the forward pass to compute structural network activations
+    const Matrix& Aout = network.forward(X);
+
+    // Compute loss criteria and trigger backward propagation to populate internal gradient matrices
+    double loss = Criteria.forward(Aout, Ytarget);
+    
+    Matrix dL_dA(1, 2); // gradient buffer
+
+    Criteria.backward(Aout, Ytarget, dL_dA); // fill the buffer
+
+    network.backward(dL_dA); // propagates the error and fills dW and dB matrixes
+
+    // Cache initial weight parameters before optimization to allow strict compliance tracking
+    const Matrix& dWcalc = network.getFirstLayerdW();
+    const Matrix& dBcalc = network.getFirstLayerdB();
+
+    Matrix Wexpected;
+    Wexpected.copyFrom(Winit);
+    Wexpected.update(dWcalc, -alpha);
+
+    Matrix Bexpected;
+    Bexpected.copyFrom(Binit);
+    Bexpected.update(dBcalc, -alpha);
+
+    // Trigger the polymorphic optimizer update phase to adjust model parameters in-place 
+    network.update(sgdOpti);
+
+    // Assert compliance of the updated weights against the mathematical gradient descent baseline
+    assert(Wexpected == network.getFirstLayerW());
+    assert(Bexpected == network.getFirstLayerB());
+
+    std::cout << "[PASS] test_optimizer ; Loss value is " << loss << std::endl;
+    
+}
+
 /**
  * @brief Main test runner program orchestrating the validation suites
  */
@@ -234,6 +374,8 @@ int main() {
     test_layer();
     test_loss();
     test_backward();
+    test_sequential();
+    test_sgd_optimizer();
     
     std::cout << "=== ALL TESTS PASSED SUCCESSFULLY ===" << std::endl;
     return 0;

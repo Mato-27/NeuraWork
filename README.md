@@ -81,13 +81,13 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 
 * **[X] Phase 5:** Backpropagation Engine (Chain Rule Matrix Differentiation and Backward Pass Tracking).
 
-* **[ ] Phase 6:** Optimization Engine (Stochastic Gradient Descent and Adaptive Moment Estimation - Adam).
+* **[X] Phase 6:** Optimization Engine (Stochastic Gradient Descent and Adaptive Moment Estimation - Adam).
 
-* **[ ] Phase 7:** Network Container Orchestration (Sequential Network Pipeline Builder).
+* **[X] Phase 7:** Network Container Orchestration (Sequential Network Pipeline Builder).
 
 ## 📄 Author & Specifications
 * **Author:** *Magdi Vitteau* (Claude Bernard University Lyon 1)
 
-* **Status:** Phase 5 Complete - Fully Functional Backpropagation Engine
+* **Status:** Phase 6 & 7 Functionnal - Sequential Orchestration & SGD Engine Complete
 
 * **License:** Open for Academic and High-Performance Software Review

@@ -22,6 +22,8 @@ class Layer {
         int outputSize;
         /// Saved input (1*N size)
         Matrix X; 
+        /// Internal buffer storing the gradient of the loss (1*N size)
+        Matrix dX; 
         /// Weights (N*M size)
         Matrix W; 
         /// dWeights (N*M size)
@@ -47,11 +49,10 @@ class Layer {
 
         /**
         * @brief Executes the forward pass of the neural network Layer
-        * @details Stores the input Matrix for backpropagation, reassigns the pre-activation
-        * matrix dimensions to fit the batch size, computes the linear transformation
-        * (X * W + B) without heap allocation overhead, and applies the activation function
-        * @param inputMatrix Input data matrix of dimensions (Batch Size x Input Size)
-        * @return Reference to the activated output Matrix A of dimensions (Batch Size x Output Size)
+        * @details Stores the input matrix, resizes internal buffers dynamically 
+        * without systematic reallocations, and computes the activation states.
+        * @param inputMatrix Constant reference to the incoming activation Matrix
+        * @return Reference to the internal post-activation A Matrix
         */
         Matrix& forward(const Matrix& inputMatrix);
 
@@ -67,7 +68,59 @@ class Layer {
         */
         void setB (const Matrix& b);
 
+        /**
+        * @brief Executes the complete backward pass for the individual layer
+        * @details Computes gradients for weights (dW) and biases (dB) using static calls,
+        * then propagates the error back to the previous layer via dL_dX without reallocation.
+        * @param dL_dA Constant reference to the incoming gradient from the downstream layer
+        * @param dL_dX Reference to the destination matrix where the calculated input gradient is written
+        */
         void backward(const Matrix& dL_dA, Matrix& dL_dX);
+
+        /**
+        * @brief Provides mutable access to the internal input gradient buffer
+        * @details Used by the orchestrator to pass the gradient downstream during backpropagation
+        * @return Reference to the internal dX Matrix
+        */
+        Matrix& getdX();
+
+        /**
+        * @brief Provides read-only access to the layer post-activation output buffer
+        * @details Used to feed forward activation states into the subsequent layer of the network
+        * @return Constant reference to the internal A Matrix
+        */
+        const Matrix& getA();
+
+        /**
+        * @brief Provides read-only access to the internal weight matrix
+        * @return Constant reference to the weight Matrix of dimensions (Input Size x Output Size) 
+        */
+        const Matrix& getW();
+        
+        /**
+        * @brief Provides read-only access to the internal bias vector
+        * @return Constant reference to the bias Matrix of dimensions (1 x Output Size) 
+        */
+        const Matrix& getB();
+
+        /**
+        * @brief Provides read-only access to the internal weight gradient buffer
+        * @return Constant reference to the dW Matrix accumulated during backpropagation
+        */
+        const Matrix& getdW();
+        
+        /**
+        * @brief Provides read-only access to the internal bias gradient buffer
+        * @return Constant reference to the dB Matrix accumulated during backpropagation
+        */
+        const Matrix& getdB();
+
+        /** 
+        * @brief Updates layer parameters using calculated gradients and a learning rate
+        * @details Executes in-place parameter modifications on weights and biases by scaling internal gradient buffers
+        * @param alpha The learning rate scalar applied to the gradient descent step 
+        */
+        void update(const double alpha);
 };
 
 #endif

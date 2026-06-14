@@ -59,6 +59,23 @@ class Matrix {
         int getColumns () const;
 
         /**
+        * @brief Reshapes the matrix to a new layout
+        * @details If the new total capacity matches the existing one, the memory is preserved 
+        * and only dimensions are updated. Otherwise, reallocation clears old states to zeros
+        * @param newRows The target number of rows
+        * @param newColumns The target number of columns
+        */
+        void reshape(int newRows, int newColumns);
+        
+        /**
+        * @brief Copies the dimensions and content from a source matrix
+        * @details Reuses or reallocates internal storage by calling reshape, 
+        * then performs a contiguous memory copy of the underlying data.
+        * @param source The Matrix instance to copy from
+        */
+        void copyFrom(const Matrix& source);
+        
+        /**
         * @brief Operator * overloading
         * @param mat multiplied Matrix
         * @return the product of *this and mat
@@ -180,7 +197,7 @@ class Matrix {
         * @param transB Flag forcing an implicit row/column swap layout for Matrix B 
         * @param C Reference to the pre-allocated destination Matrix where resultes are accumulated
         */
-        void d_mult(const Matrix& A, bool transA, const Matrix& B, bool transB, Matrix& C);
+        static void d_mult(const Matrix& A, bool transA, const Matrix& B, bool transB, Matrix& C);
 
         /***
         * @brief Computes a column-wise reduction sum
@@ -188,6 +205,15 @@ class Matrix {
         * @param A Reference to the pre-allocated 1xN destination vector Matrix 
         */
         void sum(Matrix& A);
+
+        /** 
+        * @brief Performs an in-place element-wise matrix accumulation scaled by a factor
+        * @details Iterates through the flattened 1D array to accumulate values directly onto the current instance
+        * @param mat Constant reference to the operand Matrix containing incoming values or gradients
+        * @param alpha Scalar multiplier applied to the operand matrix elements before accumulation
+        * @throws std::invalid_argument If the dimensions of the operand matrix do not match the current instance 
+        */
+        void update(const Matrix& mat, const double alpha);
 };
 
 #endif

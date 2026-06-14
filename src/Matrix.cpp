@@ -41,6 +41,39 @@ int Matrix::getColumns() const {
     return this->n;
 }
 
+/* Reshapes the matrix to a new layout */
+void Matrix::reshape(int newRows, int newColumns) {
+    if ((newRows * newColumns) == (m * n)) {
+        m = newRows;
+        n = newColumns;
+        return;
+    }
+
+    if (array != nullptr) {
+        delete[] array;
+        array = nullptr;
+    }
+
+    m = newRows;
+    n = newColumns;
+
+    if (m > 0 && n > 0) {
+        array = new double[m * n];
+        for (int i = 0; i < m * n; i++) {
+            array[i] = 0.0;
+        }
+    }
+}
+
+/* Copies the dimensions and content from a source matrix */
+void Matrix::copyFrom(const Matrix& source) {
+    this->reshape(source.getRows(), source.getColumns());
+    
+    if (this->array != nullptr && source.array != nullptr) {
+        std::copy(source.array, source.array + (m * n), this->array);
+    }
+}
+
 /* Matrix class copy constructor */
 Matrix::Matrix(const Matrix& mat) : m(mat.m), n(mat.n){
     array = nullptr;
@@ -228,5 +261,12 @@ void Matrix::sum(Matrix& A) {
         for (int j = 0; j < this->n; j++) {
             A.array[j] += this->array[n * i + j];
         }
+    }
+}
+
+void Matrix::update(const Matrix& mat, const double alpha) {
+    if (mat.n != n || mat.m != m) throw std::invalid_argument("Matrix dimensions must match.");
+    for (int i = 0; i < m * n; i++) {
+            this->array[i] += mat.array[i] * alpha;
     }
 }
