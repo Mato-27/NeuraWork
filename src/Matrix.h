@@ -178,6 +178,24 @@ class Matrix {
         }
 
         /**
+        * @brief Constant operator [] overloading
+        * @param i index
+        * @return the value at the index [i] of the Matrix array
+        */
+        double operator [] (const int i) const {
+            return array[i];
+        }
+
+        /**
+        * @brief Operator [] overloading
+        * @param i index
+        * @return the value at the index [i] of the Matrix
+        */
+        double& operator [] (const int i) {
+            return array[i];
+        }
+
+        /**
         * @brief Computes the in-place gradient of the ReLU activation function
         * @details Fuses the local derivative computation and the Hadamard product
         * Mutates the current gradient matrix (dL_dA) into the pre-activation gradient

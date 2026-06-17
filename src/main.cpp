@@ -357,8 +357,78 @@ void test_sgd_optimizer() {
     assert(Wexpected == network.getFirstLayerW());
     assert(Bexpected == network.getFirstLayerB());
 
-    std::cout << "[PASS] test_optimizer ; Loss value is " << loss << std::endl;
+    std::cout << "[PASS] test_sgd_optimizer ; Loss value is " << loss << std::endl;
     
+}
+
+/**
+* @brief Validates the complete training loop orchestration using the Adam optimizer 
+*/
+void test_adam_optimizer() {
+    // Setup the deterministic execution graph, input mini-batches, and Adam learning configuration
+    double alpha = 0.1; // rate of learning
+    AdamOptimizer sgdOpti(alpha);
+    Sequential network;
+    std::unique_ptr<Layer> l1 = std::make_unique<Layer> (2,2);
+
+    // Setup a weight matrix with uniform initial states and inject it into the layer
+    Matrix Winit(2, 2);
+    Winit.randomize(0.5, 0.5);
+    l1->setW(Winit);
+
+    // Setup a bias vector with uniform initial states and inject it into the layer
+    Matrix Binit(1, 2);
+    Binit.randomize(1.0, 1.0);
+    l1->setB(Binit);
+
+    // Generate a deterministic input mini-batch and target matrix to yield known gradients
+    network.add(std::move(l1));
+
+    Matrix X(1, 2);
+    X.randomize(2.0, 2.0);
+
+    Matrix Ytarget(1, 2);
+    Ytarget.randomize(0.0, 0.0);
+
+    MSELoss Criteria;
+
+    // Perform the forward pass to compute structural network activations 
+    const Matrix& Aout = network.forward(X);
+
+    // Compute loss criteria and trigger backward propagation to populate internal gradient matrices
+    double loss = Criteria.forward(Aout, Ytarget);
+
+    Matrix dL_dA(1, 2); // gradient buffer
+
+    Criteria.backward(Aout, Ytarget, dL_dA); // fill the buffer
+
+    network.backward(dL_dA); // propagates the error and fills dW and dB matrixes
+
+    // Cache initial weight parameters before optimization to allow strict compliance tracking
+    const Matrix& dWcalc = network.getFirstLayerdW();
+    const Matrix& dBcalc = network.getFirstLayerdB();
+
+    // Trigger the polymorphic optimizer update phase to adjust model parameters in-place 
+    network.update(sgdOpti);
+
+    // Assert compliance of the updated weights against the mathematical gradient descent baseline
+    int sizeW = Winit.getColumns() * Winit.getRows();
+    for (int k = 0; k < sizeW; k++) {
+        double g = dWcalc[k];
+
+        double analyticalW = Winit[k] - (alpha / (std::sqrt(g * g) + 1e-8)) * g;
+        assert_almost_equal(analyticalW, network.getFirstLayerW()[k]);
+    }
+
+    int sizeB = Binit.getColumns() * Binit.getRows();
+    for (int k = 0; k < sizeB; k++) {
+        double g = dBcalc[k];
+
+        double analyticalB = Binit[k] - (alpha / (std::sqrt(g * g) + 1e-8)) * g;
+        assert_almost_equal(analyticalB, network.getFirstLayerB()[k]);
+    }
+    
+    std::cout << "[PASS] test_adam_optimizer ; Loss value is " << loss << std::endl;
 }
 
 /**
@@ -376,6 +446,7 @@ int main() {
     test_backward();
     test_sequential();
     test_sgd_optimizer();
+    test_adam_optimizer();
     
     std::cout << "=== ALL TESTS PASSED SUCCESSFULLY ===" << std::endl;
     return 0;

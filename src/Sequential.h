@@ -9,6 +9,7 @@
 #define SEQUENTIAL_H
 
 #include "SGDOptimizer.h"
+#include "AdamOptimizer.h"
 
 /**
 * @class Sequential

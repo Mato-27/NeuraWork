@@ -15,6 +15,10 @@ Optimized for maximum computational efficiency, the architecture prioritizes CPU
 * **RAII & Memory Safety:** Full resource management via standard Resource Acquisition Is Initialization (RAII), featuring automated memory deallocation and clean pointer lifetimes.
 * **Exception-Safe Assignments:** Structural reassignments employ the secure Copy-and-Swap idiom (`std::swap`), avoiding self-assignment corruption and offering strong exception guarantees.
 
+### 🎛️ Polymorphic Optimization & Inversion of Control
+* **Double Dispatch Pattern:** To modify private parameters ($W, B$) without violating class encapsulation or exposing mutable getters, the framework employs a Double Dispatch mechanism. The `Sequential` container invokes the optimizer, which in turn commands the `Layer` to pass its private matrices back to the optimizer's execution kernel (`updateLayer`).
+* **Zero-Allocation Stateful Tracking (Adam):** The `AdamOptimizer` tracks historical first and second rolling moments ($m_t, v_t$) per layer under strict memory constraints. It implements **Lazy Initialization**: moment vectors are allocated on the Heap exactly once via a conditional `reshape` during the first mini-batch execution ($t=1$). Subsequent iterations trigger zero micro-allocations, achieving optimal mechanical sympathy.
+
 ### 🧠 Mathematical Operations
 * **Zero-Allocation Inference Pipeline:** Neural network layers reuse persistent data structures (`X`, `W`, `B`, `Z`, `A`) across inputs, ensuring zero heap allocations during the forward pass.
 * **Industrial Broadcasting:** The accumulation engine (`Matrix::add`) dynamically detects input shapes, enabling seamless addition of a $1 \times M$ bias vector to a multi-batch $B \times M$ pre-activation matrix through stride-based 1D index mapping.
@@ -81,13 +85,13 @@ The framework includes a rigid validation architecture within ```src/main.cpp```
 
 * **[X] Phase 5:** Backpropagation Engine (Chain Rule Matrix Differentiation and Backward Pass Tracking).
 
-* **[X] Phase 6:** Optimization Engine (Stochastic Gradient Descent and Adaptive Moment Estimation - Adam).
+* **[X] Phase 6:** Optimization Engine (Stochastic Gradient Descent via contiguous AXPY kernels and stateful Adaptive Moment Estimation - Adam with analytical $t=1$ validation).
 
 * **[X] Phase 7:** Network Container Orchestration (Sequential Network Pipeline Builder).
 
 ## 📄 Author & Specifications
 * **Author:** *Magdi Vitteau* (Claude Bernard University Lyon 1)
 
-* **Status:** Phase 6 & 7 Functionnal - Sequential Orchestration & SGD Engine Complete
+* **Status:** Phase 6 & 7 Functional - Sequential Infrastructure, Inversion of Control, and Zero-Allocation SGD/Adam Engines fully operational and verified.
 
 * **License:** Open for Academic and High-Performance Software Review

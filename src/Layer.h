@@ -10,6 +10,8 @@
 
 #include "Matrix.h"
 
+class Optimizer;
+
 /**
 * @class Layer
 * @brief This class allows the use of Layers
@@ -120,7 +122,16 @@ class Layer {
         * @details Executes in-place parameter modifications on weights and biases by scaling internal gradient buffers
         * @param alpha The learning rate scalar applied to the gradient descent step 
         */
-        void update(const double alpha);
+        /*void update(const double alpha);*/
+
+        /**
+        * @brief Delegates parameter optimization to an external strategy
+        * @details Utilizes a double dispatch mechanism to pass internal parameter 
+        * states to the running optimizer engine without exposing mutable accessors
+        * @param optimizer Reference to the abstract Optimizer execution pipeline
+        * @param layerIndex The geometrix position index of this layer within the network topology  
+        */
+        void update(Optimizer& optimizer, int layerIndex);
 };
 
 #endif

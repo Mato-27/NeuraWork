@@ -4,7 +4,7 @@
 * @author Magdi.V
 * @date June 8, 2026
 */
-#include "Layer.h"
+#include "Optimizer.h"
 
 /* Layer class constructor */
 Layer::Layer(int inputSize, int outputSize) : 
@@ -94,8 +94,12 @@ const Matrix& Layer::getdB() {
     return dB;
 }
 
-void Layer::update(const double alpha) {
+/* void Layer::update(const double alpha) {
     const double oppAlpha = -alpha;
     W.update(dW, oppAlpha);
     B.update(dB, oppAlpha);
+} */
+
+void Layer::update(Optimizer& optimizer, int layerIndex) {
+    optimizer.updateLayer(layerIndex, W, B, dW, dB);
 }

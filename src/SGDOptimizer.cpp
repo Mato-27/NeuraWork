@@ -14,5 +14,11 @@ SGDOptimizer::SGDOptimizer(const double al) :
     }
 
 void SGDOptimizer::update(std::vector<std::unique_ptr<Layer>>& layers) {
-    for (auto& layer : layers) layer->update(alpha);
+    for (auto& layer : layers) layer->update(*this, 1);
+}
+
+void SGDOptimizer::updateLayer(int /* layerIndex */, Matrix& W, Matrix& B, const Matrix& dW, const Matrix& dB) {
+    const double oppAlpha = -alpha;
+    W.update(dW, oppAlpha);
+    B.update(dB, oppAlpha);
 }

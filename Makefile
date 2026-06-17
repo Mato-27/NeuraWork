@@ -1,7 +1,7 @@
 all: main.out
 
-main.out: obj/main.o obj/matrix.o obj/layer.o obj/MSELoss.o obj/Sequential.o obj/SGDOptimizer.o
-	g++ -g -Wall obj/main.o obj/matrix.o  obj/layer.o obj/MSELoss.o obj/Sequential.o obj/SGDOptimizer.o -o bin/main.out
+main.out: obj/main.o obj/matrix.o obj/layer.o obj/MSELoss.o obj/Sequential.o obj/SGDOptimizer.o obj/AdamOptimizer.o
+	g++ -g -Wall obj/main.o obj/matrix.o  obj/layer.o obj/MSELoss.o obj/Sequential.o obj/SGDOptimizer.o obj/AdamOptimizer.o -o bin/main.out
 
 obj/main.o: src/main.cpp src/Matrix.h src/Layer.h
 	g++ -g -Wall -c src/main.cpp -o obj/main.o
@@ -20,6 +20,9 @@ obj/Sequential.o: src/Sequential.h src/Sequential.cpp
 
 obj/SGDOptimizer.o: src/SGDOptimizer.h src/SGDOptimizer.cpp
 	g++ -g -Wall -c src/SGDOptimizer.cpp -o obj/SGDOptimizer.o
+
+obj/AdamOptimizer.o: src/AdamOptimizer.h src/AdamOptimizer.cpp
+	g++ -g -Wall -c src/AdamOptimizer.cpp -o obj/AdamOptimizer.o
 
 docu:
 	doxygen doc/doxyfile

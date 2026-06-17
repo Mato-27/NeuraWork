@@ -16,6 +16,7 @@
 */
 class SGDOptimizer : public Optimizer {
     private:
+        /// Static learning rate multiplier applied directly to the directional gradients
         double alpha;
 
     public:
@@ -31,6 +32,18 @@ class SGDOptimizer : public Optimizer {
         * @param layers Reference to the dynamic container holding polymorphic network layers
         */
         void update(std::vector<std::unique_ptr<Layer>>& layers) override;
+
+        /**
+        * @brief Executes a standard linear gradient descent step in-place
+        * @details Ignores historical tracking vectors to perform a fast contiguous AXPY accumulation 
+        * directly onto the layer parameters scaled by a negative static learning rate factor
+        * @param layerIndex The geometric position index of the targeted layer
+        * @param W Mutable reference to the weight Matrix layout
+        * @param B Mutable reference to the bias vector Matrix layout
+        * @param dW Constant reference to the accumulated weight gradient Matrix
+        * @param dB Constant reference to the accumulated bias gradient Matrix
+        */
+        void updateLayer(int layerIndex, Matrix& W, Matrix& B, const Matrix& dW, const Matrix& dB) override;
 };
 
 #endif
