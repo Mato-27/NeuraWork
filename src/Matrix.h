@@ -232,6 +232,12 @@ class Matrix {
         * @throws std::invalid_argument If the dimensions of the operand matrix do not match the current instance 
         */
         void update(const Matrix& mat, const double alpha);
+
+        /**
+        * @brief Fills the Matrix with the value given in parameters
+        * @param value The value to fill the Matrix with
+        */
+        void fill(const double value);
 };
 
 #endif

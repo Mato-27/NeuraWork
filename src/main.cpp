@@ -6,8 +6,10 @@
 */
 
 #include "Matrix.h"
-#include "Layer.h"
-#include "MSELoss.h"
+#include "./layer/LinearLayer.h"
+#include "./layer/ReLULayer.h"
+#include "./layer/SoftmaxLayer.h"
+#include "./loss/MSELoss.h"
 #include "Sequential.h"
 #include <cassert>
 #include <iostream>
@@ -106,7 +108,7 @@ void test_hpc_methods() {
  */
 void test_layer() {
     // Instantiate a mock layer structure with 3 inputs and 2 outputs
-    Layer l1(3, 2);
+    LinearLayer l1(3, 2);
 
     // Setup a 3x2 weight matrix with uniform 0.5 values and inject it into the layer
     Matrix W(3, 2);
@@ -129,20 +131,8 @@ void test_layer() {
     // Accumulate the expected bias vector onto the local pre-activation matrix via broadcasting
     Z.add(B);
 
-    // Deep copy the local linear results to isolate the activation baseline execution
-    Matrix A = Z;
-    // Apply the local element-wise Rectified Linear Unit activation function on the baseline matrix
-    A.computeReLU();
-
-    // Define a static ground truth verification matrix filled with the mathematically expected value 4.0
-    Matrix R(2, 2);
-    R.randomize(4.0, 4.0);
-
-    // Assert that the local execution pipeline matches the calculated ground truth matrix
-    assert(A == R);
-
     // Assert that the encapsulation layer's forward pass perfectly matches the validated reference
-    assert(A == l1.forward(inputMatrix));
+    assert(Z == l1.forward(inputMatrix));
 
     std::cout << "[PASS] test_layer" << std::endl;
 }
@@ -184,9 +174,12 @@ void test_loss() {
     std::cout << "[PASS] test_loss" << std::endl;
 }
 
+/**
+* @brief Validates the backward pass mechanics and parameter gradient accumulation of LinearLayer
+*/
 void test_backward() {
     // Instantiate a mock layer structure with 2 inputs and 2 outputs
-    Layer l1(2, 2);
+    LinearLayer l1(2, 2);
 
     // Setup a 2x2 weight matrix with uniform 0.5 values and inject it into the layer
     Matrix W(2, 2);
@@ -209,11 +202,8 @@ void test_backward() {
     Matrix dL_dA(1, 2);
     dL_dA.randomize(1.0, 1.0);
 
-    // Pre-allocate a 1x2 destination Matrix for the input gradient
-    Matrix dL_dX(1, 2);
-
     // Execute the backward pass to calculate gradients in place
-    l1.backward(dL_dA, dL_dX);
+    const Matrix& dL_dX = l1.backward(dL_dA);
 
     // Verify the input gradient matrix values against mathematical expectations
     assert_almost_equal(dL_dX(0, 0), 1.0);
@@ -222,46 +212,47 @@ void test_backward() {
     std::cout << "[PASS] test_backward" << std::endl;
 }
 
-/** 
-* @brief Validates the linear graph orchestration of the Sequential class 
+/**
+* @brief Validates the composite execution flow of a modular Sequential container
 */
 void test_sequential() {
     // Instantiate the global Sequential network orchestrator
     Sequential seq;
 
     // --- Layer 1 Configuration ---
-    // Allocate a unique pointer for the first hidden layer (2 inputs, 3 outputs)
-    std::unique_ptr<Layer> l1 = std::make_unique<Layer> (2,3);
+    // instantiated as a concrete smart pointer to allow direct acces to parametric configurations
+    auto linear1 = std::make_unique<LinearLayer>(2, 3);
 
     // Setup a 2x3 weight matrix with uniform 0.5 values and inject it into the first layer
     Matrix w1(2, 3);
     w1.randomize(0.5, 0.5);
-    l1->setW(w1);
+    linear1->setW(w1);
 
     // Setup a 1x3 bias vector with uniform 0.0 values and inject it into the first layer
     Matrix b1(1, 3);
     b1.randomize(0.0, 0.0);
-    l1->setB(b1);
+    linear1->setB(b1);
 
-    // Transfer ownership of the fully configured first layer into the sequential pipeline
-    seq.add(std::move(l1));
+    // Transfer ownership to the sequential graph container
+    seq.add(std::move(linear1));
+
+    // Instantiated using the default non-parametric layout contract
+    seq.add(std::make_unique<ReLULayer>());
 
     // --- Layer 2 Configuration ---
-    // Allocate a unique pointer for the first hidden layer (3 inputs, 2 outputs)
-    std::unique_ptr<Layer> l2 = std::make_unique<Layer> (3,2);
+    auto linear2 = std::make_unique<LinearLayer>(3, 2);
 
-    // Setup a 3x2 weight matrix with uniform 1.0 values and inject it into the first layer
     Matrix w2(3, 2);
     w2.randomize(1.0, 1.0);
-    l2->setW(w2);
+    linear2->setW(w2);
 
-    // Setup a 1x2 bias vector with uniform 0.5 values and inject it into the first layer
     Matrix b2(1, 2);
     b2.randomize(0.5, 0.5);
-    l2->setB(b2);
+    linear2->setB(b2);
 
-    // Transfer ownership of the fully configured second layer into the sequential pipeline
-    seq.add(std::move(l2));
+    seq.add(std::move(linear2));
+
+    seq.add(std::make_unique<ReLULayer>());
 
     // --- Forward integration test ---
     // Setup a 1x2 input Matrix filled with uniform 2.0 values
@@ -306,17 +297,19 @@ void test_sgd_optimizer() {
     double alpha = 0.1; // rate of learning
     SGDOptimizer sgdOpti(alpha);
     Sequential network;
-    std::unique_ptr<Layer> l1 = std::make_unique<Layer> (2,2);
-
+    auto linear1 = std::make_unique<LinearLayer>(2, 2);
+    
     Matrix Winit(2, 2);
     Winit.randomize(0.5, 0.5);
-    l1->setW(Winit);
+    linear1->setW(Winit);
 
     Matrix Binit(1, 2);
     Binit.randomize(1.0, 1.0);
-    l1->setB(Binit);
+    linear1->setB(Binit);
 
-    network.add(std::move(l1));
+    network.add(std::move(linear1));
+
+    network.add(std::make_unique<ReLULayer>());
 
     Matrix X(1, 2);
     X.randomize(2.0, 2.0);
@@ -369,20 +362,22 @@ void test_adam_optimizer() {
     double alpha = 0.1; // rate of learning
     AdamOptimizer sgdOpti(alpha);
     Sequential network;
-    std::unique_ptr<Layer> l1 = std::make_unique<Layer> (2,2);
+    auto linear1 = std::make_unique<LinearLayer>(2, 2);
 
     // Setup a weight matrix with uniform initial states and inject it into the layer
     Matrix Winit(2, 2);
     Winit.randomize(0.5, 0.5);
-    l1->setW(Winit);
+    linear1->setW(Winit);
 
     // Setup a bias vector with uniform initial states and inject it into the layer
     Matrix Binit(1, 2);
     Binit.randomize(1.0, 1.0);
-    l1->setB(Binit);
+    linear1->setB(Binit);
 
     // Generate a deterministic input mini-batch and target matrix to yield known gradients
-    network.add(std::move(l1));
+    network.add(std::move(linear1));
+
+    network.add(std::make_unique<ReLULayer>());
 
     Matrix X(1, 2);
     X.randomize(2.0, 2.0);
@@ -431,6 +426,41 @@ void test_adam_optimizer() {
     std::cout << "[PASS] test_adam_optimizer ; Loss value is " << loss << std::endl;
 }
 
+void test_softmax_layer() {
+    // Instantiates a non-parametrix Softmax activation layer component
+    SoftmaxLayer softmax;
+
+    // Create a deterministic 1x3 input Matrix representing structural linear logits
+    Matrix X(1, 3);
+    X[0] = 1.0;
+    X[1] = 2.0;
+    X[2] = 3.0;
+
+    // Execute the forward pass propagation to generate normalized probabilities
+    const Matrix& A = softmax.forward(X);
+
+    // Assert that the generated probability distribution matches analytical baselines
+    assert_almost_equal(A[0], 0.09003057317);
+    assert_almost_equal(A[1], 0.24472847102);
+    assert_almost_equal(A[2], 0.66524095580);
+
+    // Setup an identical incoming gradient vector to trigger uniform error pooling
+    Matrix dL_dA(1, 3);
+    dL_dA[0] = 1.0;
+    dL_dA[1] = 1.0;
+    dL_dA[2] = 1.0;
+
+    // Execute the backward pass to calculate directional loss derivatives
+    const Matrix& dL_dX = softmax.backward(dL_dA);
+
+    // Verify that a uniform incoming gradient yields a zero-gradients output equilibrium
+    assert_almost_equal(dL_dX[0], 0.0);
+    assert_almost_equal(dL_dX[1], 0.0);
+    assert_almost_equal(dL_dX[2], 0.0);
+
+    std::cout << "[PASS] test_softmax_layer" << std::endl;
+}
+
 /**
  * @brief Main test runner program orchestrating the validation suites
  */
@@ -447,6 +477,7 @@ int main() {
     test_sequential();
     test_sgd_optimizer();
     test_adam_optimizer();
+    test_softmax_layer();
     
     std::cout << "=== ALL TESTS PASSED SUCCESSFULLY ===" << std::endl;
     return 0;

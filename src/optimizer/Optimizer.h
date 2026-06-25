@@ -8,7 +8,8 @@
 #ifndef OPTIMIZER_H
 #define OPTIMIZER_H
 
-#include "Layer.h"
+#include "../layer/LinearLayer.h" 
+#include "../layer/ReLULayer.h" 
 #include <memory>
 
 /**

@@ -8,8 +8,8 @@
 #ifndef SEQUENTIAL_H
 #define SEQUENTIAL_H
 
-#include "SGDOptimizer.h"
-#include "AdamOptimizer.h"
+#include "./optimizer/SGDOptimizer.h"
+#include "./optimizer/AdamOptimizer.h"
 
 /**
 * @class Sequential

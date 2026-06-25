@@ -8,7 +8,7 @@
 #ifndef LOSS_H
 #define LOSS_H
 
-#include "Matrix.h"
+#include "../Matrix.h"
 
 /**
 * @class Loss

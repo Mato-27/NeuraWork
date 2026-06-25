@@ -12,35 +12,50 @@ void Sequential::add(std::unique_ptr<Layer> layer) {
 }
 
 const Matrix& Sequential::forward(const Matrix& input) {
-    array[0]->forward(input);
-    for (unsigned int i = 1; i < array.size(); i++) {
-        array[i]->forward(array[i-1]->getA());
-    }
-    return array.back()->getA();
+    // Establish a tracking pointer to cascade activation flows throough the graph
+    const Matrix* currentInput = &input;
+
+    // Iterate sequentially through all polymorphic architectural components
+    for (auto& layer : array) currentInput = &(layer->forward(*currentInput));
+    
+    // Return a constant reference to the final operational network output
+    return *currentInput;
 }
 
 void Sequential::backward(const Matrix& dL_dA) {
-    int size = array.size() - 1;
-    array[size]->backward(dL_dA, array[size]->getdX());
-    for (int i = size - 1; i >= 0; i--) {
-        array[i]->backward(array[i+1]->getdX(), array[i]->getdX());
-    }
+    // Establish a tracking pointer to cascade error gradients upstream
+    const Matrix* currentGradient = &dL_dA;
+
+    // Traverse the execution graph in reverse chronological order (Chain rule)
+    for (int i = array.size() - 1; i >= 0; i--) currentGradient = &(array[i]->backward(*currentGradient));
 }
 
 const Matrix& Sequential::getFirstLayerW() {
-    return array[0]->getW();
+    // Execute a secure runtime downcast to inspect localized parameters
+    LinearLayer* linear = dynamic_cast<LinearLayer*>(array.front().get());
+    if (!linear) throw std::runtime_error("Architecture Error: First layer is not a parametric LinearLayer");
+    return linear->getW();
 }
 
 const Matrix& Sequential::getFirstLayerB() {
-    return array[0]->getB();
+    // Execute a secure runtime downcast to inspect localized parameters
+    LinearLayer* linear = dynamic_cast<LinearLayer*>(array.front().get());
+    if (!linear) throw std::runtime_error("Architecture Error: First layer is not a parametric LinearLayer");
+    return linear->getB();
 }
 
 const Matrix& Sequential::getFirstLayerdW() {
-    return array[0]->getdW();
+    // Execute a secure runtime downcast to inspect localized parameters
+    LinearLayer* linear = dynamic_cast<LinearLayer*>(array.front().get());
+    if (!linear) throw std::runtime_error("Architecture Error: First layer is not a parametric LinearLayer");
+    return linear->getdW();
 }
 
 const Matrix& Sequential::getFirstLayerdB() {
-    return array[0]->getdB();
+    // Execute a secure runtime downcast to inspect localized parameters
+    LinearLayer* linear = dynamic_cast<LinearLayer*>(array.front().get());
+    if (!linear) throw std::runtime_error("Architecture Error: First layer is not a parametric LinearLayer");
+    return linear->getdB();
 }
 
 void Sequential::update(Optimizer& optimizer) {

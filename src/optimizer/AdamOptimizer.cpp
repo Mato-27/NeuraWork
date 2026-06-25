@@ -1,3 +1,9 @@
+/**
+* @file AdamOptimizer.cpp
+* @brief File containing AdamOptimizer class implementation
+* @author Magdi.V
+* @date June 15, 2026
+*/
 #include "AdamOptimizer.h"
 
 /* AdamOptimizer class constructor */

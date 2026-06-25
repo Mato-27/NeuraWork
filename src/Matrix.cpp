@@ -270,3 +270,9 @@ void Matrix::update(const Matrix& mat, const double alpha) {
             this->array[i] += mat.array[i] * alpha;
     }
 }
+
+void Matrix::fill(const double value) {
+    for (int i = 0; i < m * n; i++) {
+        array[i] = value;
+    }
+}
